@@ -1,0 +1,24 @@
+
+from django.db import models
+
+from .databaseModels.login_master import login_master
+from .databaseModels.bank_master import bank_master
+from .databaseModels.client_account_details import client_account_details
+from .databaseModels.client_super_master import client_super_master
+from .databaseModels.lookup_role import lookup_role
+from .databaseModels.lookup_state import lookup_state
+from .databaseModels.merchant_data import merchant_data
+from .databaseModels.merchant_document import merchant_document
+from .databaseModels.temp_kyc import TempKyc
+from .databaseModels.lookup_application import lookup_application
+from .databaseModels.client_application_mapper import client_application_mapper
+from .databaseModels.OTP import OTP
+from .databaseModels.verification import Verification
+from .databaseModels.application_master import application_master
+from .databaseModels.application_sub_plan_master import application_sub_plan_master
+from .databaseModels.client_subscribed_plan_details import client_subscribed_plan_details
+from .databaseModels.zone_master import zone_master
+from .databaseModels.employee_master import employee_master
+from .databaseModels.zone_employee_mapper import zone_employee_mapper
+from .databaseModels.zone_head_master import zone_head_master
+from .databaseModels.merchant_address import merchant_address

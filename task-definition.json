@@ -1,0 +1,38 @@
+{
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "memory": "2048",
+    "networkMode": "awsvpc",
+    "placementConstraints": [],
+    "containerDefinitions": [
+        {
+            "portMappings": [
+                {
+                    "containerPort": 5000,
+                    "hostPort": 5000,
+                    "protocol": "tcp"
+                }
+            ],
+            "memoryReservation": 512,
+            "name": "cobapi-stage",
+            "environment": [],
+            "essential": true,
+            "cpu": 0,
+            "logConfiguration": {
+                "options": {
+                    "awslogs-region": "ap-south-1",
+                    "awslogs-stream-prefix": "ecs",
+                    "awslogs-group": "/ecs/cobapistag"
+                },
+                "logDriver": "awslogs"
+            },
+            "image": "077852359894.dkr.ecr.ap-south-1.amazonaws.com/cobapi-stage",
+            "volumesFrom": [],
+            "mountPoints": []
+        }
+    ],
+    "cpu": "1024",
+    "volumes": [],
+    "family": "cobapistag"
+}

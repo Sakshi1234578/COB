@@ -1,0 +1,46 @@
+image: python:3.7.4
+
+pipelines:
+  tags:
+    ecr-release-*:
+      - step:
+          services:
+            - docker
+          caches:
+            - pip
+          script:
+            - export SAMPLE_SERVICE=cobapistag
+            - export SAMPLE_CLUSTER=stage-app
+            - export EXECUTION_ROLE=arn:aws:iam::077852359894:role/ecsTaskExecutionRole
+            - export EXECUTION_FAMILY=cobapistag
+            - export SUBNET_GROUP_1=subnet-0d224ad72463a9bd5
+            - export SUBNET_GROUP_2=subnet-074b991b935ba807d
+            - export SECURITY_GROUP=sg-054cb8bd2adabacbe
+            - export DEFAULT_REGION=ap-south-1
+            - export ARN_SUBSTRING=arn:aws:ecs:ap-south-1:077852359894:task-definition/
+            - export DOCKER_IMAGE_URL=077852359894.dkr.ecr.ap-south-1.amazonaws.com/cobapi-stage
+            - curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+            - unzip awscli-bundle.zip
+            - ./awscli-bundle/install -b ~/bin/aws
+            - export PATH=~/bin:$PATH
+            - aws --version
+            - echo "Pinging ACR to get login credentials"
+            - aws configure set aws_access_key_id "${AWS_ACCESS_KEY_ID}"
+            - aws configure set aws_secret_access_key "${AWS_SECRET_ACCESS_KEY}"
+            - aws configure set default_region_name $DEFAULT_REGION
+            - echo ${AWS_ACCESS_KEY_ID}
+            - echo ${AWS_SECRET_ACCESS_KEY}
+            - aws ecr get-login-password --region $DEFAULT_REGION | docker login --username AWS --password-stdin $DOCKER_IMAGE_URL
+            - docker build -t sample-react-app  .
+            - docker tag sample-react-app:latest $DOCKER_IMAGE_URL 
+            - docker push $DOCKER_IMAGE_URL
+            - export TASK_VERSION=$((aws ecs register-task-definition --execution-role-arn $EXECUTION_ROLE --cli-input-json file:///opt/atlassian/pipelines/agent/build/task-definition.json) | grep revision | cut -d ":" -f2 | cut -d "," -f1 | tr -d ' ')
+            - echo $TASK_VERSION
+            - export RUNNING_TASK=$(aws ecs list-tasks --cluster $SAMPLE_CLUSTER --service-name $SAMPLE_SERVICE | grep $ARN_SUBSTRING | tr -d ' ' | tr -d '"')
+          #  - aws ecs stop-task --task $RUNNING_TASK --cluster $SAMPLE_CLUSTER 
+            - echo $RUNNING_TASK
+            - echo $SAMPLE_CLUSTER
+            - echo $SAMPLE_SERVICE
+            - echo $EXECUTION_FAMILY
+            - aws ecs update-service --cluster $SAMPLE_CLUSTER --service $SAMPLE_SERVICE --task-definition $EXECUTION_FAMILY:$TASK_VERSION
+          #  - aws ecs run-task --cluster $SAMPLE_CLUSTER --task-definition $EXECUTION_FAMILY:$TASK_VERSION --count 1 --launch-type "FARGATE" --network-configuration "awsvpcConfiguration={subnets=[$SUBNET_GROUP_1,$SUBNET_GROUP_2],securityGroups=[$SECURITY_GROUP]}"
